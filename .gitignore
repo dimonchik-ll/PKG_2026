@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+
+lab_2/*
+!lab_2/app.py
+!lab_2/README.md
+!lab_2/requirements.txt
