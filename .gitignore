@@ -1,7 +1,8 @@
 __pycache__/
 *.pyc
 
-lab_2/*
-!lab_2/app.py
-!lab_2/README.md
-!lab_2/requirements.txt
+streamlit_lab2_simple/
+
+lab_2/.streamlit/
+lab_2/formats/
+lab_2/Для проверки Lab2/
