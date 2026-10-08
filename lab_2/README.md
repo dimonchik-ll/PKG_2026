@@ -32,3 +32,6 @@ pip install -r requirements.txt
 ```bash
 streamlit run app.py
 ```
+
+## Ссылка на приложение
+https://image-info-lab.streamlit.app/
