@@ -40,11 +40,11 @@ def get_dpi(image):
         y = float(dpi[1])
 
         if x <= 0 or y <= 0:
-            return "—", "—"
+            return "72.0", "72.0"
 
         return round(x, 2), round(y, 2)
 
-    return "—", "—"
+    return "72.0", "72.0"
 
 
 def get_compression(image):
