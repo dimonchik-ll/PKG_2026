@@ -11,6 +11,6 @@ img = Image.open("test_images/ава.jpg").convert("RGB")
 data = np.array(img)
 buffer = PixelBuffer(convert_to_grayscale(data))
 
-res_buffer = apply_filter(buffer, 7, "min")
+res_buffer = apply_filter(buffer, 11, "median")
 
 st.image(res_buffer.to_Image())

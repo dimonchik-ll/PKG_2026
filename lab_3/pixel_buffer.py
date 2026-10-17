@@ -11,23 +11,15 @@ class PixelBuffer:
         pad_w = self.width + radius * 2
         padded = np.empty((pad_h, pad_w), dtype=np.uint8)
 
-        for y in range(pad_h):
-            for x in range(pad_w):
-                if y < radius:
-                    src_y = 0
-                elif y >= self.height + radius:
-                    src_y = self.height - 1 
-                else:
-                    src_y = y - radius
+        padded[radius : radius + self.height, radius : radius + self.width] = self.data
 
-                if x < radius:
-                    src_x = 0
-                elif x >= self.width + radius:
-                    src_x = self.width - 1 
-                else:
-                    src_x = x - radius
+        for y in range(radius):
+            padded[y, radius : radius + self.width] = self.data[0, :]
+            padded[pad_h - y - 1, radius : radius + self.width] = self.data[-1, :]
 
-                padded[y, x] = self.data[src_y, src_x]
+        for x in range(radius):
+            padded[:, x] = padded[:, radius]
+            padded[:, pad_w - x - 1] = padded[:, pad_w -radius - 1]
 
         return padded
 
