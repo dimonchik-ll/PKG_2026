@@ -9,8 +9,6 @@ def get_func(func):
 def apply_filter(buffer: PixelBuffer, radius: int, process_function: str, padding_method: str = "clamp") -> PixelBuffer:
     window_size = 2 * radius + 1
     padded = buffer.create_padded_array(radius)
-    h, w = padded.shape[:2]
-    filtered = np.empty((h, w), dtype=np.uint8)
     func = get_func(process_function)
 
     windows = sliding_window_view(padded, (window_size, window_size))
