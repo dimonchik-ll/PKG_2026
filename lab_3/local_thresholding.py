@@ -8,13 +8,13 @@ def convert_to_grayscale(data: np.ndarray):
 
     return grayscale_data
 
-def apply_niblack_thresholding(buffer: PixelBuffer, radius: int, k: int):
+def apply_niblak_thresholding(buffer: PixelBuffer, radius: int, k: int, padding_method: str = "clamp"):
     img_array = buffer.data
     window_size = radius * 2 + 1
     window_area = window_size ** 2
     h, w = buffer.height, buffer.width
 
-    padded = buffer.create_padded_array(radius=radius)
+    padded = buffer.create_padded_array(radius=radius, padding_method=padding_method)
     pad_h, pad_w = padded.shape[:2]
 
     sat = np.zeros((pad_h + 1, pad_w + 1), dtype=np.float64)

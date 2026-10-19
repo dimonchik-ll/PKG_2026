@@ -8,7 +8,7 @@ def get_func(func):
 
 def apply_filter(buffer: PixelBuffer, radius: int, process_function: str, padding_method: str = "clamp") -> PixelBuffer:
     window_size = 2 * radius + 1
-    padded = buffer.create_padded_array(radius)
+    padded = buffer.create_padded_array(radius=radius, padding_method=padding_method)
     func = get_func(process_function)
 
     windows = sliding_window_view(padded, (window_size, window_size))

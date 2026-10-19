@@ -1,16 +1,107 @@
 import streamlit as st
 from PIL import Image
 import numpy as np
-from local_thresholding import convert_to_grayscale, apply_niblack_thresholding
+from local_thresholding import convert_to_grayscale, apply_niblak_thresholding
 from filters import apply_filter
 from pixel_buffer import PixelBuffer
 
-st.image("test_images/4_adaptive_extreme_shadow.png")
+st.set_page_config(page_title="Лабораторная работа №3", layout="wide")
+st.title("Лабораторная работа №3 — Вариант 15")
 
-img = Image.open("test_images/4_adaptive_extreme_shadow.png").convert("RGB")
-data = np.array(img)
-buffer = PixelBuffer(convert_to_grayscale(data))
+uploaded = st.sidebar.file_uploader("Загрузите изображение (PNG, JPG, BMP)", type=["png", "jpg", "jpeg", "bmp"])
+if uploaded is not None:
+    input_image = Image.open(uploaded).convert("RGB")
+    input_np = np.array(input_image, dtype=np.uint8)
+    grayscale_np = convert_to_grayscale(input_np)
+    input_buffer = PixelBuffer(grayscale_np)
+else:
+    st.info("Загрузите изображение в боковой панели")
+    st.stop()
 
-res_buffer = apply_niblack_thresholding(buffer, 30, -0.1)
+st.sidebar.header("Алгоритмы обработки")
 
-st.image(res_buffer.to_Image())
+method = st.sidebar.radio(
+    "Выберите алгоритм обработки",
+    ("Нелиный фильтр", "Локальная пороговая обработка")
+)
+
+st.sidebar.header("Параметры")
+
+if method == "Нелиный фильтр":
+    filter_type = st.sidebar.selectbox(
+        "Тип фильтра",
+        (
+            ("min", "Фильтр минимума"),
+            ("max", "Фильтр максимума"),
+            ("median", "Медианный фильтр")
+        ),
+        format_func=lambda x: x[1]
+    )[0]
+
+    filter_radius = st.sidebar.slider(
+        "Радиус фильтра",
+        min_value=1,
+        max_value=10,
+        value=1,
+        step=1
+    )
+
+    edge_processing = st.sidebar.radio(
+        "Алгоритм обработки краев",
+        ("Clamp", "Reflect")
+    )
+
+    output_buffer = apply_filter(
+        buffer=input_buffer,
+        radius=filter_radius,
+        process_function=filter_type,
+        padding_method=edge_processing
+    )
+else:
+    thresholding_algorithm = st.sidebar.selectbox(
+        "Методы локальной пороговой обработки",
+        ("Метод Ниблэка", "Метод Сауволы")
+    )
+
+    window_radius = st.sidebar.slider(
+        "Радиус окна",
+        min_value=1,
+        max_value=50,
+        value=15,
+        step=1
+    )
+
+    k = 0.2 if thresholding_algorithm == "Метод Сауволы" else -0.2
+    k_val = st.sidebar.slider(
+        "Коэффициент (k)",
+        min_value=-1.0,
+        max_value=1.0,
+        value=k,
+        step=0.05
+    )
+
+    edge_processing = st.sidebar.radio(
+        "Алгоритм обработки краев",
+        ("Clamp", "Reflect")
+    )
+
+    if thresholding_algorithm == "Метод Ниблэка":
+        output_buffer = apply_niblak_thresholding(
+            buffer=input_buffer,
+            radius=window_radius,
+            k=k_val,
+            padding_method=edge_processing
+        )
+    else:
+        output_buffer = None
+
+if output_buffer is not None:
+    c1, c2 = st.columns(2)
+    with c1:
+        st.header("До обработки")
+        st.image(input_buffer.data)
+    with c2:
+        st.header("После обработки")
+        st.image(output_buffer.data)
+else:
+    st.header("In developing")

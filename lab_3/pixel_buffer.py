@@ -22,6 +22,3 @@ class PixelBuffer:
             padded[:, pad_w - x - 1] = padded[:, pad_w -radius - 1]
 
         return padded
-
-    def to_Image(self):
-        return Image.fromarray(self.data)
