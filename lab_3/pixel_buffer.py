@@ -13,12 +13,22 @@ class PixelBuffer:
 
         padded[radius : radius + self.height, radius : radius + self.width] = self.data
 
-        for y in range(radius):
-            padded[y, radius : radius + self.width] = self.data[0, :]
-            padded[pad_h - y - 1, radius : radius + self.width] = self.data[-1, :]
+        if padding_method == "clamp":
+            for y in range(radius):
+                padded[y, radius : radius + self.width] = self.data[0, :]
+                padded[pad_h - y - 1, radius : radius + self.width] = self.data[-1, :]
 
-        for x in range(radius):
-            padded[:, x] = padded[:, radius]
-            padded[:, pad_w - x - 1] = padded[:, pad_w -radius - 1]
+            for x in range(radius):
+                padded[:, x] = padded[:, radius]
+                padded[:, pad_w - x - 1] = padded[:, pad_w -radius - 1]
+
+        else:
+            for y in range(radius):
+                padded[y, radius : radius + self.width] = self.data[radius - y, :]
+                padded[pad_h - y - 1, radius : radius + self.width] = self.data[-radius + y - 1, :]
+
+            for x in range(radius):
+                padded[:, x] = padded[:, radius - x]
+                padded[:, pad_w - x - 1] = padded[:, -radius + x - 1]
 
         return padded
