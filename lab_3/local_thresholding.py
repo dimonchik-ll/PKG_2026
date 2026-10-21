@@ -12,7 +12,7 @@ def create_window_sums_matrix(padded_matrix: np.ndarray, image_height: int, imag
 
     sat = np.zeros((pad_h + 1, pad_w + 1), dtype=np.float64)
 
-    sat[1:, 1:] = np.cumsum(np.cumsum(element_func(padded_matrix), axis=0), axis=1)
+    sat[1:, 1:] = np.cumsum(np.cumsum(element_func(padded_matrix), axis=0, dtype=np.float64), axis=1, dtype=np.float64)
 
     A = sat[0:image_height, 0:image_width]
     B = sat[0:image_height, window_size :  window_size + image_width]
@@ -23,7 +23,7 @@ def create_window_sums_matrix(padded_matrix: np.ndarray, image_height: int, imag
 
     return window_sums
 
-def apply_niblak_thresholding(buffer: PixelBuffer, radius: int, k: int, padding_method: str = "clamp"):
+def apply_niblak_thresholding(buffer: PixelBuffer, radius: int, k: int, padding_method: str = "Clamp"):
     img_array = buffer.data
     window_size = radius * 2 + 1
     window_area = window_size ** 2
@@ -32,7 +32,7 @@ def apply_niblak_thresholding(buffer: PixelBuffer, radius: int, k: int, padding_
     padded = buffer.create_padded_array(radius=radius, padding_method=padding_method)
 
     window_sums = create_window_sums_matrix(padded, h, w, window_size)
-    window_sq_sums = create_window_sums_matrix(padded, h, w, window_size, lambda x : x ** 2)
+    window_sq_sums = create_window_sums_matrix(padded, h, w, window_size, lambda x : np.square(x, dtype=np.float64))
 
     mean = window_sums / window_area
     mean_sq = window_sq_sums / window_area
@@ -47,4 +47,29 @@ def apply_niblak_thresholding(buffer: PixelBuffer, radius: int, k: int, padding_
     return PixelBuffer(out)
 
 def apply_sauvola_thresholding(buffer: PixelBuffer, radius: int, k: int, padding_method: str = "clamp"):
-    pass
+    img_array = buffer.data
+    window_size = radius * 2 + 1
+    window_area = window_size ** 2
+    h, w = buffer.height, buffer.width
+
+    padded = buffer.create_padded_array(radius=radius, padding_method=padding_method)
+
+    window_sums = create_window_sums_matrix(padded, h, w, window_size)
+    window_sq_sums = create_window_sums_matrix(padded, h, w, window_size, lambda x : np.square(x, dtype=np.float64))
+
+    mean = window_sums / window_area
+    mean_sq = window_sq_sums / window_area
+
+    variance = np.clip(mean_sq - mean ** 2, 0, None)
+    std = np.sqrt(variance)
+
+    r = np.max(std)
+    if r == 0:
+        r = 1e-8
+
+    threshold = mean * (1 + k * ((std / r) - 1))
+
+    out = np.where(img_array > threshold, 255, 0).astype(np.uint8)
+
+    return PixelBuffer(out)
+    
