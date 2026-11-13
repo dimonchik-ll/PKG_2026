@@ -89,6 +89,80 @@ class DiscreteGrid:
                 err += dx
                 y_1 += sy
 
+    def bresenham_circle(self, cx, cy, r):
+        x = 0
+        y = r
+        d = 3 - 2 * r
+
+        while (x <= y):
+            self._draw_circle_symmetry(cx, cy, x, y)
+
+            x += 1
+            if d < 0:
+                d = d + 4 * x + 6
+            else:
+                y = y - 1
+                d = d + 4 * (x - y) + 6
+
+    def castle_pitteway_ellipse(self, cx, cy, a, b):
+        x = 0
+        y = b
+        
+        a2 = a * a
+        b2 = b * b
+        
+        K1 = 2 * b2
+        K2 = 2 * a2
+        
+        dx = 0
+        dy = K2 * y
+        
+        d1 = round(b2 - (a2 * b) + (0.25 * a2)) 
+        
+        while dx < dy:
+            self._draw_conic_symmetry(cx, cy, x, y)
+            
+            x += 1
+            dx += K1
+            
+            if d1 < 0:
+                d1 += dx + b2
+            else:
+                y -= 1
+                dy -= K2
+                d1 += dx - dy + b2
+                
+        d2 = round(b2 * (x + 0.5)**2 + a2 * (y - 1)**2 - a2 * b2)
+        
+        while y >= 0:
+            self._draw_conic_symmetry(cx, cy, x, y)
+            
+            y -= 1
+            dy -= K2
+            
+            if d2 > 0:
+                d2 += a2 - dy
+            else:
+                x += 1
+                dx += K1
+                d2 += dx - dy + a2
+
+    def _draw_circle_symmetry(self, cx, cy, x, y):
+        self.set_pixel(cx + x, cy + y)
+        self.set_pixel(cx - x, cy + y)
+        self.set_pixel(cx + x, cy - y)
+        self.set_pixel(cx - x, cy - y)
+        self.set_pixel(cx + y, cy + x)
+        self.set_pixel(cx - y, cy + x)
+        self.set_pixel(cx + y, cy - x)
+        self.set_pixel(cx - y, cy - x)
+
+    def _draw_conic_symmetry(self, cx, cy, x, y):
+        self.set_pixel(cx + x, cy + y)
+        self.set_pixel(cx - x, cy + y)
+        self.set_pixel(cx + x, cy - y)
+        self.set_pixel(cx - x, cy - y)
+
 
     def get_grid(self):
         return self.grid              
